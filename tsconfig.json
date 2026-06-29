@@ -1,0 +1,14 @@
+{
+  // Solution-style root config for the monorepo. Each app/package has its own
+  // tsconfig.json (extending ./tsconfig.base.json); the root owns no source
+  // files of its own. The empty `files` array marks this as a valid empty
+  // project so the TS language server stops reporting "No inputs were found".
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/db" },
+    { "path": "./apps/mcp-server" },
+    { "path": "./apps/support-agent" },
+    { "path": "./apps/widget" }
+  ]
+}

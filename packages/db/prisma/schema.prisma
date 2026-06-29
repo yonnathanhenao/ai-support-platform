@@ -1,0 +1,124 @@
+// AI Support Platform — persistence schema.
+//
+// Mirrors packages/core entities. Multi-tenant: every table carries `orgId`.
+// `Chunk.embedding` uses the pgvector extension for RAG similarity search.
+//
+// This schema is the deliverable of the db layer. The vertical slice still
+// runs on the in-memory store in packages/core; the RAG iteration swaps
+// searchKnowledge() onto these tables.
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+model Organization {
+  id            String         @id
+  name          String
+  createdAt     DateTime       @default(now())
+  agentConfig   AgentConfig?
+  conversations Conversation[]
+  documents     Document[]
+  tickets       Ticket[]
+  contacts      Contact[]
+  operators     Operator[]
+}
+
+model AgentConfig {
+  orgId        String       @id
+  organization Organization @relation(fields: [orgId], references: [id])
+  model        String       @default("claude-sonnet-4-6")
+  promptName   String       @default("support_agent")
+  enabledTools String[]     @default([])
+  maxSteps     Int          @default(10)
+}
+
+model Contact {
+  id           String        @id @default(cuid())
+  orgId        String
+  organization Organization  @relation(fields: [orgId], references: [id])
+  externalId   String?
+  name         String?
+  email        String?
+  conversations Conversation[]
+
+  @@index([orgId])
+}
+
+model Operator {
+  id           String       @id @default(cuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name         String
+  email        String
+
+  @@index([orgId])
+}
+
+model Conversation {
+  id         String    @id @default(cuid())
+  orgId      String
+  organization Organization @relation(fields: [orgId], references: [id])
+  contactId  String?
+  contact    Contact?  @relation(fields: [contactId], references: [id])
+  channel    String    @default("web")
+  status     String    @default("active")
+  createdAt  DateTime  @default(now())
+  messages   Message[]
+  tickets    Ticket[]
+
+  @@index([orgId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  orgId          String
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  role           String
+  content        String
+  createdAt      DateTime     @default(now())
+
+  @@index([orgId, conversationId])
+}
+
+model Document {
+  id           String       @id @default(cuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  title        String
+  source       String?
+  chunks       Chunk[]
+
+  @@index([orgId])
+}
+
+model Chunk {
+  id         String                       @id @default(cuid())
+  orgId      String
+  documentId String
+  document   Document                     @relation(fields: [documentId], references: [id])
+  content    String
+  embedding  Unsupported("vector(1536)")?
+
+  @@index([orgId])
+}
+
+model Ticket {
+  id             String       @id @default(cuid())
+  orgId          String
+  organization   Organization @relation(fields: [orgId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  reason         String
+  status         String       @default("open")
+  createdAt      DateTime     @default(now())
+
+  @@index([orgId])
+}

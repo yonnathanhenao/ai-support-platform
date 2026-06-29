@@ -1,0 +1,22 @@
+{
+  "name": "@platform/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "type-check": "prisma validate && tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^7"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^7",
+    "typescript": "^5"
+  }
+}
