@@ -1,15 +1,24 @@
-# ai-support-platform
+# AI Support Platform
 
-To install dependencies:
+Monorepo de plataforma de soporte con IA. Gestionado con [Bun](https://bun.com) + [Turbo](https://turbo.build).
 
-```bash
-bun install
+## Estructura
+
+```
+apps/
+├── mcp-server      → Servidor MCP (@platform/mcp-server)
+├── support-agent   → Agente de soporte IA
+└── widget          → Widget de chat (@platform/widget)
+packages/
+├── core            → Lógica compartida (@platform/core)
+└── db              → Capa de datos (@platform/db)
 ```
 
-To run:
+## Uso
 
 ```bash
-bun run index.ts
+bun install        # Instalar dependencias
+bun run dev        # Levantar en modo desarrollo
+bun run build      # Compilar
+bun run type-check # Verificar tipos
 ```
-
-This project was created using `bun init` in bun v1.3.14. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
